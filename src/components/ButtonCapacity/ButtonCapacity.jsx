@@ -10,6 +10,9 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon }) {
   
   // Vérifier si ce joueur a déjà agi
   const hasPlayerActed = playersWhoActed.includes(player.id);
+  
+  // Vérifier si le joueur a assez de mana
+  const hasEnoughMana = player.mana >= manaCost;
 
   // Effet pour nettoyer le timeout si le composant est démonté
   useEffect(() => {
@@ -77,12 +80,14 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon }) {
         onClick={fight}
         disabled={(player.pv === 0) || (player.mana < manaCost) || (gameStatus !== "playing") || hasPlayerActed}
         style={{ 
-          backgroundColor: hasPlayerActed ? "#6c757d" : "#007bff", 
-          color: "white" 
+          backgroundColor: hasPlayerActed ? "#6c757d" : (!hasEnoughMana ? "#6c757d" : "#007bff"), 
+          color: "white",
+          opacity: !hasEnoughMana ? 0.7 : 1
         }}
       >
         <i className={`fas ${icon} mr-1`}></i>
         {attackType} ({damage})
+        {manaCost > 0 && <span className="ml-1">({manaCost} mana)</span>}
       </button>
       
       {message && (

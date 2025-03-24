@@ -37,7 +37,7 @@ function PlayerCard({ player }) {
             <ButtonCapacity 
               player={player} 
               attackType="Boule de feu" 
-              damage={150} 
+              damage={15} 
               manaCost={5} 
               icon="fa-fire" 
             />

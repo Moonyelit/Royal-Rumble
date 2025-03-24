@@ -2,8 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   players: [
-    { name: "John", pv: 100, pvMax: 100, mana: 30, manaMax: 30, id: 1 },
-    { name: "Jack", pv: 100, pvMax: 100, mana: 30, manaMax: 30, id: 2 },
+    { name: "Riou", pv: 150, pvMax: 150, mana: 50, manaMax: 50, id: 1 },
+    { name: "Victor", pv: 170, pvMax: 170, mana: 30, manaMax: 30, id: 2 },
     { name: "Jessy", pv: 100, pvMax: 100, mana: 30, manaMax: 30, id: 3 },
     { name: "Jenny", pv: 100, pvMax: 100, mana: 30, manaMax: 30, id: 4 },
   ],
