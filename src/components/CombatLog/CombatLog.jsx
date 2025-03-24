@@ -19,6 +19,9 @@ function CombatLog() {
         case "special":
           newMessage = `Neclord déchaîne ${lastAttack.name} sur ${lastAttack.targetName} et inflige ${lastAttack.damage} points de dégâts dévastateurs!`;
           break;
+        case "drain":
+          newMessage = `Neclord utilise ${lastAttack.name} sur ${lastAttack.targetName}, absorbe ${lastAttack.damage} points de vie et se régénère de ${lastAttack.healAmount} PV!`;
+          break;
         case "miss":
           newMessage = `Neclord tente une attaque mais la rate complètement!`;
           break;
