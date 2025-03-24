@@ -1,7 +1,50 @@
+// PlayerCard.jsx
 import ButtonCapacity from "./ButtonCapacity/ButtonCapacity";
 import ProgressBar from "./ProgressBar/ProgressBar";
 
 function PlayerCard({ player }) {
+  // On définit les attaques propres à chaque personnage par leur id
+  const abilitiesByPlayer = {
+    1: [
+      { attackType: "Attaque", damage: 10, manaCost: 0, icon: "fa-fist-raised" },
+      { attackType: "Protection Sacrée", damage: 0, manaCost: 15, icon: "fa-shield" },
+      { attackType: "Coup Stratégique", damage: 15, manaCost: 10, icon: "fa-chess-knight" },      
+      { attackType: "Bouclier Lumineux", damage: 30, manaCost: 30, icon: "fa-sun" },
+    ],
+    2: [
+      { attackType: "Attaque", damage: 15, manaCost: 0, icon: "fa-fist-raised" },
+      { attackType: "Fracas de Titan", damage: 15, manaCost: 7, icon: "fa-hammer" },
+      { attackType: "Fureur Sauvage", damage: 25, manaCost: 15, icon: "fa-bolt" },
+      { attackType: "Colère Berserk", damage: 40, manaCost: 20, icon: "fa-fire" },
+    ],
+    3: [
+      { attackType: "Attaque", damage: 7, manaCost: 0, icon: "fa-fist-raised" },
+      { 
+        attackType: "Soin Miraculeux", 
+        damage: -30, 
+        manaCost: 15, 
+        icon: "fa-heart",
+        targetType: "ally", 
+        needsTargetSelection: true 
+      },
+      { attackType: "Jugement Divin", damage: 20, manaCost: 15, icon: "fa-gavel" },
+      { 
+        attackType: "Réveil Vital", 
+        damage: -15, // Cette valeur sera ignorée, on utilisera plutôt 50% des PV max
+        manaCost: 35, 
+        icon: "fa-plus",
+        targetType: "deadAlly", // Nouveau type de cible spécifique aux alliés morts
+        needsTargetSelection: true 
+      },
+    ],
+    4: [
+      { attackType: "Attaque", damage: 3, manaCost: 0, icon: "fa-fist-raised" },
+      { attackType: "Flamme Sombre", damage: 17, manaCost: 9, icon: "fa-fire" },
+      { attackType: "Onde de Ténèbres", damage: 23, manaCost: 18, icon: "fa-wave-square" },
+      { attackType: "Invocation Maléfique", damage: 35, manaCost: 20, icon: "fa-magic" },
+    ],
+  };
+
   return (
     <div
       key={player.id}
@@ -24,37 +67,21 @@ function PlayerCard({ player }) {
           barName=" : mana "
         />
 
-        <span className="badge badge-danger ml-2 " id={`degatSpanJ${player.id}`}></span>
-        <div className="row ">
+        <span className="badge badge-danger ml-2" id={`degatSpanJ${player.id}`}></span>
+        <div className="row">
           <div>
-            <ButtonCapacity 
-              player={player} 
-              attackType="Frappe" 
-              damage={5} 
-              manaCost={0} 
-              icon="fa-fist-raised" 
-            />
-            <ButtonCapacity 
-              player={player} 
-              attackType="Boule de feu" 
-              damage={15} 
-              manaCost={5} 
-              icon="fa-fire" 
-            />
-            <ButtonCapacity 
-              player={player} 
-              attackType="Éclair" 
-              damage={10} 
-              manaCost={3} 
-              icon="fa-bolt" 
-            />
-            <ButtonCapacity 
-              player={player} 
-              attackType="Tranche" 
-              damage={8} 
-              manaCost={2} 
-              icon="fa-cut" 
-            />
+            {abilitiesByPlayer[player.id].map((ability, index) => (
+              <ButtonCapacity
+                key={index}
+                player={player}
+                attackType={ability.attackType}
+                damage={ability.damage}
+                manaCost={ability.manaCost}
+                icon={ability.icon}
+                targetType={ability.targetType} // Ajoutez ces nouvelles props
+                needsTargetSelection={ability.needsTargetSelection} // Ajoutez ces nouvelles props
+              />
+            ))}
           </div>
         </div>
       </div>
