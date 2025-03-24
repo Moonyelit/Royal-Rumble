@@ -24,13 +24,37 @@ function PlayerCard({ player }) {
           barName=" : mana "
         />
 
-        <span className="badge badge-danger ml-2 " id="degatSpanJ1"></span>
+        <span className="badge badge-danger ml-2 " id={`degatSpanJ${player.id}`}></span>
         <div className="row ">
           <div>
-            <ButtonCapacity player={player} />
-            <ButtonCapacity player={player} />
-            <ButtonCapacity player={player} />
-            <ButtonCapacity player={player} />
+            <ButtonCapacity 
+              player={player} 
+              attackType="Frappe" 
+              damage={5} 
+              manaCost={0} 
+              icon="fa-fist-raised" 
+            />
+            <ButtonCapacity 
+              player={player} 
+              attackType="Boule de feu" 
+              damage={150} 
+              manaCost={5} 
+              icon="fa-fire" 
+            />
+            <ButtonCapacity 
+              player={player} 
+              attackType="Éclair" 
+              damage={10} 
+              manaCost={3} 
+              icon="fa-bolt" 
+            />
+            <ButtonCapacity 
+              player={player} 
+              attackType="Tranche" 
+              damage={8} 
+              manaCost={2} 
+              icon="fa-cut" 
+            />
           </div>
         </div>
       </div>
