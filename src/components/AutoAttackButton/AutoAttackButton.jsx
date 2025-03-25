@@ -28,16 +28,9 @@ function AutoAttackButton() {
   return (
     <div className="auto-attack-container mt-3 mb-3">
       <button 
-        className="btn btn-danger btn-lg" 
+        className="btn btn-danger btn-lg auto-attack-button" 
         onClick={handleAutoAttack}
         disabled={allPlayersActedOrDead || gameStatus !== "playing"}
-        style={{ 
-          width: '100%',
-          maxWidth: '300px',
-          margin: '0 auto',
-          display: 'block',
-          fontWeight: 'bold'
-        }}
       >
         <i className="fas fa-bolt mr-2"></i>
         Attaque Automatique

@@ -4,7 +4,7 @@ function ProgressBar({ pv, pvMax, faType, barName, bgType }) {
   return (
     <div className="progress md-progress">
       <div 
-        className="progress-bar"
+        className="progress-bar progress-bar-custom"
         style={{ width: (pv * 100 / pvMax) + "%" }}
         aria-valuenow={pv}
         aria-valuemin="0"

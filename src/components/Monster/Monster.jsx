@@ -1,5 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import monsterImage from "../../../public/Neclord/Neclord_(S2_PS1_enemy).png";
 
 import ProgressBar from "../ProgressBar/ProgressBar";
 import "./Monster.css";
@@ -22,7 +23,7 @@ function Monster() {
                     ></span>
                     <img
                       className="img-fluid"
-                      src="http://res.publicdomainfiles.com/pdf_view/67/13925387417373.png"
+                      src={monsterImage}
                       alt="monster"
                     />
                   </div>

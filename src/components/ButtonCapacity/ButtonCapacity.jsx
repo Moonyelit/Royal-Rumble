@@ -179,14 +179,9 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
   return (
     <div>
       <button 
-        className="btn btn-sm m-1" 
+        className={`btn btn-sm m-1 button-capacity ${hasPlayerActed ? 'has-acted' : (!hasEnoughMana ? 'not-enough-mana' : 'default')}`} 
         onClick={handleClick}
         disabled={(player.pv === 0) || (player.mana < manaCost) || (gameStatus !== "playing") || hasPlayerActed}
-        style={{ 
-          backgroundColor: hasPlayerActed ? "#6c757d" : (!hasEnoughMana ? "#6c757d" : "#007bff"), 
-          color: "white",
-          opacity: !hasEnoughMana ? 0.7 : 1
-        }}
       >
         <i className={`fas ${icon} mr-1`}></i>
         {attackType} ({damage})
