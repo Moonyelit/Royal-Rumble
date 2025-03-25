@@ -1,6 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { hitMonster, hitBack, monsterAttack, healAlly, resurrectAlly } from "../../features/fight/fightSlice";
+import React, { useState, useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+
+// Modifier cette ligne pour inclure monsterAttack
+import { hitMonster, hitBack, monsterAttack } from "../../features/fight/fightSlice";
+
+// Uniquement pour les messages de mort
+const hasShownDeathMessageByPlayer = {};
 
 function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType, needsTargetSelection }) {
   const dispatch = useDispatch();
@@ -15,41 +20,44 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
   // Vérifier si le joueur a assez de mana
   const hasEnoughMana = player.mana >= manaCost;
 
-  // Effet pour nettoyer le timeout si le composant est démonté
+  // Effet pour nettoyer les messages après 2 secondes
   useEffect(() => {
     let timeout;
     if (message) {
       timeout = setTimeout(() => {
         setMessage(null);
-      }, 2000); // Le message disparaît après 2 secondes
+      }, 2000);
     }
     return () => {
       if (timeout) clearTimeout(timeout);
     };
   }, [message]);
 
-  // Effet pour afficher un message en fonction du statut du jeu
+  // Effet pour gérer le message "pas de PV" - seulement lors d'un changement
+  const previousPV = useRef(player.pv);
+  
   useEffect(() => {
-    if (gameStatus === "defeat") {
-      setMessage("DÉFAITE ! Tous les joueurs sont morts.");
-    } else if (gameStatus === "victory") {
-      setMessage("VICTOIRE ! Le monstre a été vaincu !");
+    if (player.pv !== previousPV.current) {
+      previousPV.current = player.pv;
+      
+      if (player.pv === 0 && !hasShownDeathMessageByPlayer[player.id] && window.addCombatLogMessage) {
+        window.addCombatLogMessage(`${player.name} n'a plus de PV, il ne peut plus attaquer !`, "warning");
+        hasShownDeathMessageByPlayer[player.id] = true;
+      } else if (player.pv > 0) {
+        hasShownDeathMessageByPlayer[player.id] = false;
+      }
     }
-  }, [gameStatus]);
-
-  // Ajouter cet effet pour afficher un message si le joueur est mort ou a déjà agi
-  useEffect(() => {
-    if (player.pv === 0) {
-      setMessage("Ce joueur n'a plus de PV, il ne peut plus attaquer !");
-    } else if (hasPlayerActed) {
-      setMessage("Ce joueur a déjà agi ce tour, attendez que les autres agissent.");
-    }
-  }, [player.pv, hasPlayerActed]);
-
+  }, [player.pv, player.name, player.id]);
+  
   const fight = () => {
     if (player.pv > 0 && player.mana >= manaCost && !hasPlayerActed) {
       // Le joueur attaque le monstre
       dispatch(hitMonster({ damage, playerId: player.id, manaCost }));
+      
+      // Ajouter un message pour l'attaque du joueur
+      if (window.addCombatLogMessage) {
+        window.addCombatLogMessage(`${player.name} attaque Neclord et inflige ${damage} dégâts!`, "primary");
+      }
 
       function getRandomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -66,24 +74,30 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
         dispatch(hitBack({ damage: randomDamage, playerId: player.id }));
         
         // Afficher un message pour la contre-attaque réussie
-        setMessage(`Le monstre contre-attaque et inflige ${randomDamage} dégâts!`);
+        if (window.addCombatLogMessage) {
+          window.addCombatLogMessage(`Le monstre contre-attaque ${player.name} et inflige ${randomDamage} dégâts!`, "danger");
+        }
       } else {
         // Le monstre rate sa contre-attaque
-        setMessage("Le monstre rate sa contre-attaque!");
+        if (window.addCombatLogMessage) {
+          window.addCombatLogMessage("Le monstre rate sa contre-attaque!", "success");
+        }
       }
       
       // Vérifier si c'est le dernier joueur vivant à jouer
       const alivePlayers = players.filter(p => p.pv > 0);
       const playersWhoWillHaveActed = [...playersWhoActed, player.id];
-      const allPlayersWillHaveActed = alivePlayers.every(p => 
-        playersWhoWillHaveActed.includes(p.id)
-      );
       
-      // Si tous les joueurs ont joué, déclencher l'attaque spéciale du monstre
-      if (allPlayersWillHaveActed && gameStatus === "playing") {
+      // Si tous les joueurs vivants ont agi, le monstre attaque
+      if (alivePlayers.length > 0 && alivePlayers.every(p => playersWhoWillHaveActed.includes(p.id))) {
+        if (window.addCombatLogMessage) {
+          window.addCombatLogMessage("Tous les héros ont agi, c'est au tour de Neclord!", "warning");
+        }
+        
+        // Décommenter cette ligne pour activer l'attaque du monstre
         setTimeout(() => {
           dispatch(monsterAttack());
-        }, 1000); // Attendre 1 seconde avant l'attaque du monstre
+        }, 1000);
       }
     }
   };
@@ -91,87 +105,13 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
   const handleClick = () => {
     // Vérifier si le joueur a assez de mana
     if (player.mana < manaCost) {
-      alert("Pas assez de mana!");
+      setMessage(`Pas assez de mana! (${player.mana}/${manaCost})`);
       return;
     }
 
     if (targetType === "ally" && needsTargetSelection) {
-
-      
-      // Filtrer les alliés en excluant l'ennemi et le joueur actuel
-      const allies = players.filter(p => 
-        p.id !== player.id && // Exclure le joueur actuel
-        p.id !== 5 &&         // Exclure Neclord (ajustez cet ID selon votre structure)
-        p.pv > 0              // Exclure les joueurs déjà vaincus
-      );
-      
-      // Le reste du code reste inchangé
-      if (allies.length === 0) {
-        alert("Aucun allié disponible à soigner!");
-        return;
-      }
-      
-      // Créer une liste des alliés pour l'affichage
-      const alliesOptions = allies.map((ally, index) => 
-        `${index + 1}. ${ally.name} (PV: ${ally.pv}/${ally.pvMax})`
-      ).join('\n');
-      
-      // Demander à l'utilisateur de choisir un allié
-      const choice = prompt(`Choisissez un allié à soigner:\n${alliesOptions}`, "1");
-      
-      // Si un choix valide a été fait
-      if (choice && !isNaN(choice) && parseInt(choice) > 0 && parseInt(choice) <= allies.length) {
-        const selectedAlly = allies[parseInt(choice) - 1];
-        
-        // Dispatcher l'action de soin
-        dispatch(healAlly({
-          allyId: selectedAlly.id,
-          healAmount: damage, // damage est négatif pour le soin
-          casterId: player.id,
-          manaCost: manaCost
-        }));
-      }
-    } else if (targetType === "deadAlly" && needsTargetSelection) {
-      // Filtrer uniquement les alliés morts
-      const deadAllies = players.filter(p => 
-        p.id !== player.id && // Exclure le joueur actuel
-        p.id !== 5 &&         // Exclure Neclord (ajustez si nécessaire)
-        p.pv === 0            // Uniquement les joueurs morts
-      );
-      
-      if (deadAllies.length === 0) {
-        alert("Aucun allié mort à ressusciter!");
-        return;
-      }
-      
-      // Créer une liste des alliés morts pour l'affichage
-      const deadAlliesOptions = deadAllies.map((ally, index) => 
-        `${index + 1}. ${ally.name}`
-      ).join('\n');
-      
-      // Demander à l'utilisateur de choisir un allié mort
-      const choice = prompt(`Choisissez un allié à ressusciter:\n${deadAlliesOptions}`, "1");
-      
-      // Si un choix valide a été fait
-      if (choice && !isNaN(choice) && parseInt(choice) > 0 && parseInt(choice) <= deadAllies.length) {
-        const selectedAlly = deadAllies[parseInt(choice) - 1];
-        
-        // Calculer la moitié des PV max pour la résurrection
-        const resurrectionHP = Math.floor(selectedAlly.pvMax / 2);
-        
-        // Dispatcher l'action de résurrection
-        dispatch(resurrectAlly({
-          allyId: selectedAlly.id,
-          resurrectAmount: resurrectionHP,
-          casterId: player.id,
-          manaCost: manaCost
-        }));
-        
-        // Afficher un message de confirmation
-        setMessage(`${player.name} ressuscite ${selectedAlly.name} avec ${resurrectionHP} PV!`);
-      }
+      // Logique de sélection de cible...
     } else {
-      // Votre logique existante pour les autres types d'attaques
       fight();
     }
   };
@@ -179,7 +119,7 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
   return (
     <div>
       <button 
-        className={`btn btn-sm m-1 button-capacity ${hasPlayerActed ? 'has-acted' : (!hasEnoughMana ? 'not-enough-mana' : 'default')}`} 
+        className={`ability-button ${hasPlayerActed ? 'has-acted' : (!hasEnoughMana ? 'not-enough-mana' : 'default')}`} 
         onClick={handleClick}
         disabled={(player.pv === 0) || (player.mana < manaCost) || (gameStatus !== "playing") || hasPlayerActed}
       >
@@ -189,18 +129,7 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
       </button>
       
       {message && (
-        <div 
-          style={{
-            position: "absolute",
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
-            color: "white",
-            padding: "5px 10px",
-            borderRadius: "5px",
-            fontSize: "0.9rem",
-            marginTop: "5px",
-            zIndex: 100
-          }}
-        >
+        <div className="message-popup">
           {message}
         </div>
       )}

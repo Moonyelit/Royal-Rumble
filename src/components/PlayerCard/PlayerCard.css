@@ -1,0 +1,124 @@
+/* PlayerCard.css */
+
+/* 
+  Carte en style "glassmorphism", 
+  occupant ~23% de la largeur (pour 4 cartes par ligne)
+*/
+.player-card {
+    width: 23%;
+    min-width: 200px;
+    height: 220px; /* Hauteur réduite */
+    background-image: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(240, 240, 240, 0.3) 100%
+    );
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  
+    display: flex;
+    flex-direction: column;
+    margin: 5px;
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  
+  .top-row {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 auto; /* Taille fixe basée sur son contenu */
+  }
+  
+  .image-container {
+    width: 5rem;
+    height: 5rem;
+    background-image: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
+    border: white 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px;
+  }
+  
+  .image-container img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  .infos-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  
+  .name-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  
+  /* Les barres de vie / mana en colonne */
+  .bars-row {
+    display: flex;
+    flex-direction: column;
+    padding: 4px;
+    gap: 4px;
+    flex: 1;
+    overflow-y: auto; /* Ajoute un défilement si nécessaire */
+  }
+
+  .bars-row-pv {
+    background-image: linear-gradient(135deg, #640404 0%, #c40000 100%);
+  }
+
+  .bars-row-mana {
+    background-image: linear-gradient(135deg, #014868 0%, #00a2ff 100%);
+  }
+  
+  /* 
+    Conteneur des capacités : 2 colonnes, 
+    on y placera des boutons stylés
+  */
+  .abilities-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 4px;
+    padding: 4px;
+    flex: 0 0 auto;
+  }
+  
+  .ability-button {
+    margin-top: 0.5rem;
+    background-image: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
+    color: white;
+    border: none;
+    border-radius: 10px; 
+    padding: 4px; 
+    font-size: 0.9rem; 
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .ability-button:hover {
+    background-color: #003c9c; 
+    transform: scale(1.05); 
+  }
+  
+  .ability-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }

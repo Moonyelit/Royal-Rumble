@@ -1,23 +1,13 @@
-import './App.css'
-import Monster from './components/Monster/Monster'
-import PlayerList from './components/PlayerList'
-import CombatLog from './components/CombatLog/CombatLog';
-import AutoAttackButton from './components/AutoAttackButton/AutoAttackButton';
+// App.jsx
+import React from "react";
+import BattleScene from "./components/BattleScene/BattleScene";
 
 function App() {
   return (
     <div className="App">
-      <Monster />
-      <br></br>
-      {/* Ajouter le bouton d'attaque automatique ici */}
-      <AutoAttackButton />
-      {/* Composant CombatLog */}
-      <CombatLog />
-      <section className="container-fluid">
-        <PlayerList />
-      </section>
+      <BattleScene />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
