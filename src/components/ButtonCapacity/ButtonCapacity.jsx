@@ -75,12 +75,12 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
         
         // Afficher un message pour la contre-attaque réussie
         if (window.addCombatLogMessage) {
-          window.addCombatLogMessage(`Le monstre contre-attaque ${player.name} et inflige ${randomDamage} dégâts!`, "danger");
+          window.addCombatLogMessage(`Neclord contre-attaque ${player.name} et inflige ${randomDamage} dégâts!`, "danger");
         }
       } else {
         // Le monstre rate sa contre-attaque
         if (window.addCombatLogMessage) {
-          window.addCombatLogMessage("Le monstre rate sa contre-attaque!", "success");
+          window.addCombatLogMessage("Neclord rate sa contre-attaque!", "success");
         }
       }
       

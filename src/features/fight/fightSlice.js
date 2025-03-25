@@ -184,12 +184,16 @@ export const fightSlice = createSlice({
       const { allyId, healAmount, casterId, manaCost } = action.payload;
       const ally = state.players.find((player) => player.id === allyId);
       if (ally) {
-        ally.pv = Math.min(ally.pv - healAmount, ally.pvMax);
+        // Correction ici: ajouter les PV au lieu de les soustraire
+        ally.pv = Math.min(ally.pv + healAmount, ally.pvMax);
         const caster = state.players.find((player) => player.id === casterId);
         if (caster) {
           caster.mana -= manaCost;
         }
-        // (Optionnel) On pourrait ajouter un message dans le log
+        // Ajouter le joueur à la liste de ceux qui ont agi
+        if (!state.playersWhoActed.includes(casterId)) {
+          state.playersWhoActed.push(casterId);
+        }
       }
     },
 
@@ -209,51 +213,251 @@ export const fightSlice = createSlice({
     },
 
     autoAttack: (state) => {
+      // Pour chaque joueur vivant qui n'a pas encore agi
       state.players.forEach((player) => {
-        if (player.pv > 0 && !state.playersWhoActed.includes(player.id)) {
-          const abilities = getPlayerAbilities(player.id);
-          const bestAbility = chooseBestAbility(state, player, abilities);
-          if (bestAbility) {
-            if (
-              bestAbility.targetType === "ally" &&
-              bestAbility.attackType === "Soin Miraculeux"
-            ) {
-              const aliveAllies = state.players.filter(
-                (p) => p.pv > 0 && p.id !== player.id
-              );
-              if (aliveAllies.length > 0) {
-                const lowestHpAlly = aliveAllies.reduce((prev, curr) =>
-                  prev.pv / prev.pvMax < curr.pv / curr.pvMax ? prev : curr
-                );
-                lowestHpAlly.pv = Math.min(
-                  lowestHpAlly.pv - bestAbility.damage,
-                  lowestHpAlly.pvMax
-                );
-                player.mana -= bestAbility.manaCost;
-                state.playersWhoActed.push(player.id);
-              }
-            } else if (
-              bestAbility.targetType === "deadAlly" &&
-              bestAbility.attackType === "Réveil Vital"
-            ) {
-              const deadAlly = state.players.find((p) => p.pv === 0);
-              if (deadAlly) {
-                deadAlly.pv = Math.floor(deadAlly.pvMax * 0.3);
-                player.mana -= bestAbility.manaCost;
-                state.playersWhoActed.push(player.id);
-              }
+        // Ne pas traiter les joueurs qui ont déjà agi ou qui sont morts
+        if (state.playersWhoActed.includes(player.id) || player.pv === 0) {
+          return;
+        }
+        
+        // Variables pour stocker les informations sur l'attaque
+        let attackInfo = null;
+        
+        // Choisir différentes attaques selon le joueur
+        switch(player.id) {
+          case 1: // Riou
+            if (player.mana >= 30) {
+              // Attaque puissante
+              attackInfo = {
+                name: "Lame Brillante", 
+                damage: 20, 
+                manaCost: 30
+              };
             } else {
-              state.monster.pv = Math.max(
-                0,
-                state.monster.pv - bestAbility.damage
+              // Attaque de base
+              attackInfo = {
+                name: "Attaque Rapide", 
+                damage: 10, 
+                manaCost: 0
+              };
+            }
+            break;
+            
+          case 2: // ViKtor
+            if (player.mana >= 25) {
+              // Attaque puissante
+              attackInfo = {
+                name: "Coup de Maître", 
+                damage: 25, 
+                manaCost: 25
+              };
+            } else {
+              // Attaque de base
+              attackInfo = {
+                name: "Frappe Directe", 
+                damage: 15, 
+                manaCost: 0
+              };
+            }
+            break;
+            
+          case 3: // Nanami
+            // Vérifier si quelqu'un a besoin de soin
+            const needsHealing = state.players.some(p => p.pv > 0 && p.pv < p.pvMax * 0.5);
+            const anyoneDead = state.players.some(p => p.pv === 0);
+            
+            if (anyoneDead && player.mana >= 40) {
+              // Résurrection
+              const deadPlayer = state.players.find(p => p.pv === 0);
+              attackInfo = {
+                type: "resurrect",
+                name: "Souffle de Vie",
+                targetId: deadPlayer.id,
+                healAmount: Math.floor(deadPlayer.pvMax * 0.3),
+                manaCost: 40,
+                targetName: deadPlayer.name
+              };
+            } else if (needsHealing && player.mana >= 25) {
+              // Soin
+              const playerToHeal = state.players.find(p => p.pv > 0 && p.pv < p.pvMax * 0.5);
+              attackInfo = {
+                type: "heal",
+                name: "Vague Guérisseuse",
+                targetId: playerToHeal.id,
+                healAmount: 40,
+                manaCost: 25,
+                targetName: playerToHeal.name
+              };
+            } else if (player.mana >= 15) {
+              // Attaque
+              attackInfo = {
+                name: "Frappe Aquatique", 
+                damage: 12, 
+                manaCost: 15
+              };
+            } else {
+              // Attaque de base
+              attackInfo = {
+                name: "Tourbillon", 
+                damage: 8, 
+                manaCost: 0
+              };
+            }
+            break;
+            
+          case 4: // Sierra
+            if (player.mana >= 50) {
+              // Attaque puissante
+              attackInfo = {
+                name: "Morsure Vampirique", 
+                damage: 35, 
+                manaCost: 50
+              };
+            } else if (player.mana >= 20) {
+              // Attaque moyenne
+              attackInfo = {
+                name: "Griffes des Ténèbres", 
+                damage: 18, 
+                manaCost: 20
+              };
+            } else {
+              // Attaque de base
+              attackInfo = {
+                name: "Frappe Nocturne", 
+                damage: 12, 
+                manaCost: 0
+              };
+            }
+            break;
+        }
+        
+        if (attackInfo) {
+          // Trouver l'index du joueur pour les mises à jour
+          const playerIndex = state.players.findIndex(p => p.id === player.id);
+          
+          // Exécuter l'action selon le type
+          if (attackInfo.type === "heal") {
+            // Soin - utiliser l'ID du joueur cible pour le trouver dans le tableau
+            const targetIndex = state.players.findIndex(p => p.id === attackInfo.targetId);
+            if (targetIndex !== -1) {
+              // Mettre à jour PV de la cible
+              state.players[targetIndex].pv = Math.min(
+                state.players[targetIndex].pvMax, 
+                state.players[targetIndex].pv + attackInfo.healAmount
               );
-              player.mana -= bestAbility.manaCost;
-              state.playersWhoActed.push(player.id);
+              
+              // Réduire le mana du soigneur
+              if (playerIndex !== -1) {
+                state.players[playerIndex].mana -= attackInfo.manaCost;
+              }
+              
+              // Log pour le soin
+              state.lastAttack = {
+                type: "heal",
+                name: attackInfo.name,
+                healerName: player.name,
+                targetName: attackInfo.targetName,
+                healAmount: attackInfo.healAmount
+              };
+              
+              // Message spécifique de soin
+              if (window.addCombatLogMessage) {
+                window.addCombatLogMessage(
+                  `${player.name} utilise ${attackInfo.name} sur ${attackInfo.targetName} et restaure ${attackInfo.healAmount} points de vie!`,
+                  "success"
+                );
+              }
+            }
+          } 
+          else if (attackInfo.type === "resurrect") {
+            // Résurrection - utiliser l'ID de la cible
+            const targetIndex = state.players.findIndex(p => p.id === attackInfo.targetId);
+            if (targetIndex !== -1 && state.players[targetIndex].pv === 0) {
+              // Ressusciter le joueur
+              state.players[targetIndex].pv = attackInfo.healAmount;
+              
+              // Réduire le mana du lanceur
+              if (playerIndex !== -1) {
+                state.players[playerIndex].mana -= attackInfo.manaCost;
+              }
+              
+              // Log pour la résurrection
+              state.lastAttack = {
+                type: "resurrect",
+                name: attackInfo.name,
+                healerName: player.name,
+                targetName: attackInfo.targetName,
+                healAmount: attackInfo.healAmount
+              };
+              
+              // Message spécifique de résurrection
+              if (window.addCombatLogMessage) {
+                window.addCombatLogMessage(
+                  `${player.name} utilise ${attackInfo.name} sur ${attackInfo.targetName} et le ressuscite avec ${attackInfo.healAmount} points de vie!`,
+                  "warning"
+                );
+              }
             }
           }
+          else {
+            // Attaque normale
+            state.monster.pv = Math.max(0, state.monster.pv - attackInfo.damage);
+            
+            // Réduire le mana de l'attaquant
+            if (playerIndex !== -1) {
+              state.players[playerIndex].mana -= attackInfo.manaCost;
+            }
+            
+            // Log pour l'attaque
+            state.lastAttack = {
+              type: "playerAttack",
+              name: attackInfo.name,
+              attackerName: player.name,
+              damage: attackInfo.damage
+            };
+            
+            // Message spécifique d'attaque
+            if (window.addCombatLogMessage) {
+              window.addCombatLogMessage(
+                `${player.name} attaque Neclord avec ${attackInfo.name} et inflige ${attackInfo.damage} dégâts!`,
+                "primary"
+              );
+            }
+            
+            // Contre-attaque du monstre
+            const monsterMissesAttack = Math.random() <= 0.3;
+            if (!monsterMissesAttack) {
+              const randomDamage = Math.floor(Math.random() * 6) + 3; // 3-8 dégâts
+              
+              // Mettre à jour les PV du joueur
+              if (playerIndex !== -1) {
+                state.players[playerIndex].pv = Math.max(0, state.players[playerIndex].pv - randomDamage);
+              }
+              
+              // Message de contre-attaque
+              if (window.addCombatLogMessage) {
+                window.addCombatLogMessage(
+                  `Le monstre contre-attaque ${player.name} et inflige ${randomDamage} dégâts!`,
+                  "danger"
+                );
+              }
+            } else {
+              // Message d'échec de contre-attaque
+              if (window.addCombatLogMessage) {
+                window.addCombatLogMessage(
+                  "Le monstre rate sa contre-attaque!",
+                  "success"
+                );
+              }
+            }
+          }
+          
+          // Marquer ce joueur comme ayant agi
+          state.playersWhoActed.push(player.id);
         }
       });
-
+      
+      // Vérifier si le monstre est vaincu
       if (state.monster.pv === 0) {
         state.gameStatus = "victory";
       }
@@ -261,166 +465,9 @@ export const fightSlice = createSlice({
   },
 });
 
-// Fonctions d'aide
 
-function getPlayerAbilities(playerId) {
-  const abilitiesByPlayer = {
-    1: [
-      {
-        attackType: "Attaque",
-        damage: 20,
-        manaCost: 0,
-        icon: "fa-fist-raised",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "e",
-        damage: 10,
-        manaCost: 15,
-        icon: "fa-shield",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "Coup Stratégique",
-        damage: 25,
-        manaCost: 10,
-        icon: "fa-chess-knight",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "Bouclier Lumineux",
-        damage: 40,
-        manaCost: 30,
-        icon: "fa-sun",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-    ],
-    2: [
-      {
-        attackType: "Attaque",
-        damage: 25,
-        manaCost: 0,
-        icon: "fa-fist-raised",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "Fracas de Titan",
-        damage: 25,
-        manaCost: 7,
-        icon: "fa-hammer",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "Fureur Sauvage",
-        damage: 35,
-        manaCost: 15,
-        icon: "fa-bolt",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "Colère Berserk",
-        damage: 50,
-        manaCost: 20,
-        icon: "fa-fire",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-    ],
-    3: [
-      {
-        attackType: "Attaque",
-        damage: 17,
-        manaCost: 0,
-        icon: "fa-fist-raised",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "Soin Miraculeux",
-        damage: -40,
-        manaCost: 15,
-        icon: "fa-heart",
-        targetType: "ally",
-        needsTargetSelection: true,
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "Jugement Divin",
-        damage: 30,
-        manaCost: 15,
-        icon: "fa-gavel",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "Réveil Vital",
-        damage: -25,
-        manaCost: 35,
-        icon: "fa-plus",
-        targetType: "deadAlly",
-        needsTargetSelection: true,
-        className: "ability-button" // Ajout de la classe CSS
-      },
-    ],
-    4: [
-      {
-        attackType: "Attaque",
-        damage: 13,
-        manaCost: 0,
-        icon: "fa-fist-raised",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "Flamme Sombre",
-        damage: 27,
-        manaCost: 9,
-        icon: "fa-fire",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "Onde de Ténèbres",
-        damage: 33,
-        manaCost: 18,
-        icon: "fa-wave-square",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-      {
-        attackType: "Invocation Maléfique",
-        damage: 45,
-        manaCost: 20,
-        icon: "fa-magic",
-        className: "ability-button" // Ajout de la classe CSS
-      },
-    ],
-  };
-  return abilitiesByPlayer[playerId] || [];
-}
 
-function chooseBestAbility(state, player, abilities) {
-  const affordableAbilities = abilities.filter(
-    (ability) => ability.manaCost <= player.mana
-  );
-  if (affordableAbilities.length === 0) return null;
-  if (player.id === 3 && player.mana >= 35) {
-    const deadAlly = state.players.find((p) => p.pv === 0);
-    if (deadAlly) {
-      return affordableAbilities.find((a) => a.attackType === "Réveil Vital");
-    }
-  }
-  if (player.id === 3 && player.mana >= 15) {
-    const lowHealthAllies = state.players.filter(
-      (p) => p.pv > 0 && p.id !== player.id && p.pv / p.pvMax < 0.3
-    );
-    if (lowHealthAllies.length > 0) {
-      return affordableAbilities.find((a) => a.attackType === "Soin Miraculeux");
-    }
-  }
-  const attackAbilities = affordableAbilities.filter(
-    (a) =>
-      !a.targetType ||
-      (a.targetType !== "ally" && a.targetType !== "deadAlly")
-  );
-  return attackAbilities.reduce((best, current) =>
-    best.damage > current.damage ? best : current
-  );
-}
+
 
 export const {
   hitMonster,

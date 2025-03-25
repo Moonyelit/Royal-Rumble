@@ -14,15 +14,23 @@ function AutoAttackButton() {
   );
   
   const handleAutoAttack = () => {
-    // Faire attaquer tous les joueurs automatiquement
-    dispatch(autoAttack());
+    // Ajouter un message au début de l'auto-attaque
+    if (window.addCombatLogMessage) {
+      window.addCombatLogMessage("Mode auto-attaque activé: les héros utilisent leurs meilleures capacités!", "info");
+    }
     
-    // Après un court délai, faire attaquer le monstre
+    // S'assurer que les messages du journal apparaissent avant d'envoyer l'action
     setTimeout(() => {
-      if (gameStatus === "playing") {
-        dispatch(monsterAttack());
-      }
-    }, 1000);
+      // Faire attaquer tous les joueurs automatiquement
+      dispatch(autoAttack());
+      
+      // Après un court délai, faire attaquer le monstre
+      setTimeout(() => {
+        if (gameStatus === "playing") {
+          dispatch(monsterAttack());
+        }
+      }, 1500); // Délai plus long pour laisser les messages s'afficher
+    }, 100);
   };
   
   return (

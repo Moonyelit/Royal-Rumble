@@ -5,6 +5,7 @@ import PlayerList from "../PlayerList/PlayerList";
 import ProgressBar from "../ProgressBar/ProgressBar";
 import CombatLog from "../CombatLog/CombatLog";
 import AutoAttackButton from "../AutoAttackButton/AutoAttackButton";
+import MusicControl from "../MusicControl/MusicControl"; // Nouvel import
 import Neclord from "../../../public/Neclord/NeclordSprite.png";
 import "./BattleScene.css";
 
@@ -14,6 +15,9 @@ function BattleScene() {
 
   return (
     <div className="battle-scene">
+      {/* Contrôle de la musique */}
+      <MusicControl />
+      
       {/* Info du boss en haut */}
       <div className="boss-info">
         <h1>{monster.name}</h1>
