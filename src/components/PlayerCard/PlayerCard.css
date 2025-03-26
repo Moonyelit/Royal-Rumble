@@ -210,6 +210,7 @@
     bottom: 0;
     opacity: 0;
     animation: modalAppear 0.4s forwards;
+    z-index: 1000;
     box-shadow: 0 0 30px rgba(0, 157, 255, 0.6);
   }
 

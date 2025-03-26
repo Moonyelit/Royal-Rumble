@@ -59,11 +59,12 @@
 
  .monster-image {
    position: absolute;
-   top: 50%;
+   top: 48%;
    left: 40%;
    transform: translate(-50%, -50%);
-   width: 7rem; /* Ajuste selon tes préférences */
+   width: 11rem; /* Ajuste selon tes préférences */
    height: auto;
+   z-index: 0;
  }
  
  .combat-log-container {
@@ -156,3 +157,23 @@
    align-items: flex-end;
    padding: 10px;
  }
+
+.Heros-sections {
+  position: absolute;
+  bottom: 14%;
+  left: 38%;
+  display: flex;
+  z-index: 0;
+}
+
+
+
+
+
+/* position: absolute;
+top: 40%;
+left: 40%;
+transform: translate(-50%, -50%);
+width: 11rem; 
+height: auto;
+z-index: 1; */

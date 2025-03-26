@@ -500,7 +500,7 @@ export const fightSlice = createSlice({
               // Message de contre-attaque
               if (window.addCombatLogMessage) {
                 window.addCombatLogMessage(
-                  `Le monstre contre-attaque ${player.name} et inflige ${randomDamage} dégâts!`,
+                  `Neclord contre-attaque ${player.name} et inflige ${randomDamage} dégâts!`,
                   "danger"
                 );
               }
@@ -508,7 +508,7 @@ export const fightSlice = createSlice({
               // Message d'échec de contre-attaque
               if (window.addCombatLogMessage) {
                 window.addCombatLogMessage(
-                  "Le monstre rate sa contre-attaque!",
+                  "Neclord rate sa contre-attaque!",
                   "success"
                 );
               }
