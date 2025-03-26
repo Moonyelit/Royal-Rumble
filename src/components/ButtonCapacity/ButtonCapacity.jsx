@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
-// Modifier cette ligne pour inclure monsterAttack et healAlly
-import { hitMonster, hitBack, monsterAttack, healAlly } from "../../features/fight/fightSlice";
+// Modifier cette ligne pour inclure resurrectAlly
+import { hitMonster, hitBack, monsterAttack, healAlly, resurrectAlly } from "../../features/fight/fightSlice";
 
 // Uniquement pour les messages de mort
 const hasShownDeathMessageByPlayer = {};
 
-function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType, needsTargetSelection, healAllies }) {
+function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType, needsTargetSelection, healAllies, tauntDuration }) {
   const dispatch = useDispatch();
   const [message, setMessage] = useState(null);
   const [showTargetSelection, setShowTargetSelection] = useState(false);
@@ -51,8 +51,8 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
   }, [player.pv, player.name, player.id]);
   
   const handleTargetSelect = (targetPlayer) => {
-    // Vérifier si le joueur cible est vivant
-    if (targetPlayer.pv > 0) {
+    // Code existant pour soigner un allié...
+    if (targetType === "ally" && targetPlayer.pv > 0) {
       // Envoyer l'action pour soigner l'allié
       dispatch(healAlly({
         allyId: targetPlayer.id,
@@ -101,22 +101,81 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
         }, 1000);
       }
     }
+    // Nouveau code pour réanimer un allié mort
+    else if (targetType === "deadAlly" && targetPlayer.pv === 0) {
+      // Calcul de la moitié des PV max
+      const resurrectionAmount = Math.floor(targetPlayer.pvMax / 2);
+      
+      // Envoyer l'action pour réanimer l'allié
+      dispatch(resurrectAlly({
+        allyId: targetPlayer.id,
+        healAmount: resurrectionAmount,
+        casterId: player.id,
+        manaCost
+      }));
+      
+      // Message pour l'action de réanimation
+      if (window.addCombatLogMessage) {
+        window.addCombatLogMessage(
+          `${player.name} utilise ${attackType} et réanime ${targetPlayer.name} avec ${resurrectionAmount} points de vie!`, 
+          "success"
+        );
+      }
+      
+      // Fermer la sélection de cible
+      setShowTargetSelection(false);
+      
+      // Contre-attaque potentielle du monstre - code existant...
+      const monsterMissesAttack = Math.random() <= 0.3;
+      if (!monsterMissesAttack) {
+        const randomDamage = Math.floor(Math.random() * 6) + 3;
+        dispatch(hitBack({ damage: randomDamage, playerId: player.id }));
+        
+        if (window.addCombatLogMessage) {
+          window.addCombatLogMessage(`Neclord contre-attaque ${player.name} et inflige ${randomDamage} dégâts!`, "danger");
+        }
+      } else {
+        if (window.addCombatLogMessage) {
+          window.addCombatLogMessage("Neclord rate sa contre-attaque!", "success");
+        }
+      }
+      
+      // Vérification pour l'attaque du monstre
+      const alivePlayers = players.filter(p => p.pv > 0);
+      const playersWhoWillHaveActed = [...playersWhoActed, player.id];
+      
+      if (alivePlayers.length > 0 && alivePlayers.every(p => playersWhoWillHaveActed.includes(p.id))) {
+        if (window.addCombatLogMessage) {
+          window.addCombatLogMessage("Tous les héros ont agi, c'est au tour de Neclord!", "warning");
+        }
+        
+        setTimeout(() => {
+          dispatch(monsterAttack());
+        }, 1000);
+      }
+    }
   };
   
   const fight = () => {
     if (player.pv > 0 && player.mana >= manaCost && !hasPlayerActed) {
-      // Le joueur attaque le monstre avec les propriétés supplémentaires
+      // Le joueur attaque le monstre
       dispatch(hitMonster({ 
         damage, 
         playerId: player.id, 
         manaCost,
         healAllies,
-        targetType
+        targetType,
+        tauntDuration
       }));
       
       // Message pour l'attaque du joueur
       if (window.addCombatLogMessage) {
         window.addCombatLogMessage(`${player.name} utilise ${attackType} et inflige ${damage} dégâts à Neclord!`, "primary");
+        
+        // Si c'est une capacité de provocation, ajouter un message
+        if (tauntDuration) {
+          window.addCombatLogMessage(`${player.name} a provoqué Neclord qui va le cibler pendant ${tauntDuration} tours!`, "warning");
+        }
         
         // Ajouter un message de soin si c'est une capacité qui soigne les alliés
         if (healAllies && targetType === "enemyAndAllies") {
@@ -174,8 +233,8 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
       return;
     }
 
-    // Si c'est une capacité qui nécessite la sélection d'un allié
-    if (targetType === "ally" && needsTargetSelection) {
+    // Si c'est une capacité qui nécessite la sélection d'un allié (vivant ou mort)
+    if ((targetType === "ally" || targetType === "deadAlly") && needsTargetSelection) {
       // Afficher l'interface de sélection d'allié
       setShowTargetSelection(true);
     } else {
@@ -190,9 +249,16 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
         onClick={handleClick}
         disabled={(player.pv === 0) || (player.mana < manaCost) || (gameStatus !== "playing") || hasPlayerActed}
       >
-        <i className={`fas ${icon} mr-1`}></i>
-        {attackType} ({Math.abs(damage)})
-        {manaCost > 0 && <span className="ml-1">({manaCost} mana)</span>}
+        <div className="ability-content">
+          <div className="ability-main">
+            <i className={`fas ${icon}`}></i>
+            <span className="ability-name">{attackType}</span>
+          </div>
+          <div className="ability-details">
+            <span className="ability-damage">({Math.abs(damage)} {damage < 0 ? 'PV' : 'dégâts'})</span>
+            {manaCost > 0 && <span className="ability-mana">({manaCost} mana)</span>}
+          </div>
+        </div>
       </button>
       
       {message && (
@@ -201,28 +267,46 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
         </div>
       )}
       
-      {/* Interface de sélection d'allié */}
+      {/* Interface de sélection d'allié ou d'allié mort */}
       {showTargetSelection && (
         <div className="ally-selection-overlay">
           <div className="ally-selection-modal">
-            <h4>Choisir un allié à soigner:</h4>
+            <h4>
+              {targetType === "ally" 
+                ? "Choisir un allié à soigner:" 
+                : "Choisir un allié à réanimer:"}
+            </h4>
             <div className="ally-selection-grid">
-              {players.map((p, index) => (
-                <button
-                  key={p.id}
-                  className={`ally-selection-button ${p.pv === 0 ? 'disabled' : ''}`}
-                  onClick={() => p.pv > 0 && handleTargetSelect(p)}
-                  disabled={p.pv === 0}
-                  style={{ 
-                    opacity: p.pv > 0 ? 1 : 0.5,
-                    '--index': index // Variable pour l'animation séquentielle
-                  }}
-                >
-                  <img src={p.image} alt={p.name} />
-                  <div className="ally-name">{p.name}</div>
-                  <div className="ally-health">{p.pv}/{p.pvMax} PV</div>
-                </button>
-              ))}
+              {players.map((p, index) => {
+                // Pour le soin normal, ne montrer que les alliés vivants
+                // Pour la réanimation, ne montrer que les alliés morts
+                const shouldDisplay = 
+                  (targetType === "ally" && p.pv > 0) || 
+                  (targetType === "deadAlly" && p.pv === 0);
+                
+                if (!shouldDisplay) return null;
+                
+                return (
+                  <button
+                    key={p.id}
+                    className="ally-selection-button"
+                    onClick={() => handleTargetSelect(p)}
+                    style={{ '--index': index }}
+                  >
+                    <img 
+                      src={p.image} 
+                      alt={p.name} 
+                      style={targetType === "deadAlly" ? {filter: "grayscale(80%)"} : {}}
+                    />
+                    <div className="ally-name">{p.name}</div>
+                    <div className="ally-health">
+                      {targetType === "ally" 
+                        ? `${p.pv}/${p.pvMax} PV` 
+                        : "Hors combat"}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
             <button className="cancel-button" onClick={() => setShowTargetSelection(false)}>
               Annuler

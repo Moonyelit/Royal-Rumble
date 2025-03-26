@@ -9,7 +9,7 @@ const initialState = {
   players: [
     { name: "Riou", pv: 200, pvMax: 200, mana: 150, manaMax: 150, id: 1, image: RiouImg },
     { name: "ViKtor", pv: 220, pvMax: 220, mana: 85, manaMax: 85, id: 2, image: ViktorImg },
-    { name: "Nanami", pv: 150, pvMax: 150, mana: 130, manaMax: 130, id: 3, image: NanamiImg },
+    { name: "Nanami", pv: 150, pvMax: 150, mana: 150, manaMax: 150, id: 3, image: NanamiImg },
     { name: "Sierra", pv: 130, pvMax: 130, mana: 200, manaMax: 200, id: 4, image: SierraImg },
   ],
   monster: {
@@ -20,6 +20,8 @@ const initialState = {
   gameStatus: "playing",
   playersWhoActed: [],
   lastAttack: null,
+  tauntedPlayerId: null,  
+  tauntRemainingTurns: 0, 
 };
 
 export const fightSlice = createSlice({
@@ -27,9 +29,25 @@ export const fightSlice = createSlice({
   initialState,
   reducers: {
     hitMonster: (state, action) => {
-      const { damage, playerId, manaCost, healAllies, targetType } = action.payload;
+      const { damage, playerId, manaCost, healAllies, targetType, tauntDuration } = action.payload;
+      
       // Réduire les PV du monstre
       state.monster.pv = Math.max(0, state.monster.pv - damage);
+
+      // Si la capacité provoque le monstre
+      if (tauntDuration) {
+        state.tauntedPlayerId = playerId;
+        state.tauntRemainingTurns = tauntDuration;
+        
+        // Message dans le journal de combat (si implémenté ailleurs)
+        if (window.addCombatLogMessage) {
+          const player = state.players.find(p => p.id === playerId);
+          window.addCombatLogMessage(
+            `${player.name} provoque Neclord qui va le cibler pendant ${tauntDuration} tours!`, 
+            "warning"
+          );
+        }
+      }
 
       // Soigner tous les alliés si la capacité le permet
       if (healAllies && targetType === "enemyAndAllies") {
@@ -71,6 +89,37 @@ export const fightSlice = createSlice({
     },
 
     monsterAttack: (state) => {
+      // Réinitialiser les actions des joueurs pour le tour suivant
+      state.playersWhoActed = [];
+      
+      // Si un joueur a attiré l'attention du monstre
+      if (state.tauntedPlayerId !== null && state.tauntRemainingTurns > 0) {
+        // Attaquer spécifiquement ce joueur
+        const targetIndex = state.players.findIndex(p => p.id === state.tauntedPlayerId);
+        if (targetIndex !== -1 && state.players[targetIndex].pv > 0) {
+          // Le monstre attaque le joueur taunté
+          const damage = Math.floor(Math.random() * 16) + 10; // 10-25 points de dégâts
+          state.players[targetIndex].pv = Math.max(0, state.players[targetIndex].pv - damage);
+          
+          // Mise à jour de la dernière attaque
+          state.lastAttack = {
+            targetId: state.tauntedPlayerId,
+            damage: damage
+          };
+          
+          // Réduire le compteur de tours de provocation
+          state.tauntRemainingTurns--;
+          
+          // Si le compteur atteint zéro, réinitialiser la cible
+          if (state.tauntRemainingTurns === 0) {
+            state.tauntedPlayerId = null;
+          }
+          
+          return; // Ne pas continuer avec l'attaque normale
+        }
+      }
+      
+      // Si pas de joueur taunté ou s'il est mort, attaque normale
       const attacks = [
         {
           name: "miss",
@@ -208,17 +257,21 @@ export const fightSlice = createSlice({
     },
 
     resurrectAlly: (state, action) => {
-      const { allyId, resurrectAmount, casterId, manaCost } = action.payload;
-      const ally = state.players.find((player) => player.id === allyId);
-      if (ally && ally.pv === 0) {
-        ally.pv = resurrectAmount;
-        const caster = state.players.find((player) => player.id === casterId);
-        if (caster) {
-          caster.mana -= manaCost;
-        }
-        if (!state.playersWhoActed.includes(casterId)) {
-          state.playersWhoActed.push(casterId);
-        }
+      const { allyId, healAmount, casterId, manaCost } = action.payload;
+      
+      // Ressusciter l'allié
+      const allyIndex = state.players.findIndex(p => p.id === allyId);
+      if (allyIndex !== -1 && state.players[allyIndex].pv === 0) {
+        // Donner la moitié des PV max
+        state.players[allyIndex].pv = healAmount;
+      }
+      
+      // Réduire le mana du lanceur
+      const casterIndex = state.players.findIndex(p => p.id === casterId);
+      if (casterIndex !== -1) {
+        state.players[casterIndex].mana -= manaCost;
+        // Marquer le joueur comme ayant agi
+        state.playersWhoActed.push(casterId);
       }
     },
 
@@ -474,10 +527,6 @@ export const fightSlice = createSlice({
     },
   },
 });
-
-
-
-
 
 export const {
   hitMonster,

@@ -7,7 +7,7 @@
 .player-card {
     width: 23%;
     min-width: 200px;
-    height: 220px; /* Hauteur réduite */
+    height: 185px; /* Hauteur réduite */
     background-image: linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.2) 0%,
@@ -90,27 +90,70 @@
   .abilities-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-gap: 4px;
-    padding: 4px;
+    grid-gap: 1px;        /* Encore réduit */
+    padding: 0px;         /* Supprimé le padding */
     flex: 0 0 auto;
+    margin-top: 2px;
   }
   
+  /* Nouveaux styles pour les boutons de capacité - version plus petite */
   .ability-button {
-    margin-top: 0.5rem;
+    margin-top: 0.1rem;  /* Encore réduit */
     background: linear-gradient(to bottom, #00f, #007);
     color: white;
     border: none;
-    border-radius: 10px; 
-    padding: 4px; 
-    font-size: 0.9rem; 
+    border-radius: 4px;   /* Encore réduit */
+    padding: 0px;         /* Supprimé le padding */
+    font-size: 0.65rem;   /* Encore réduit */
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease; 
+    transition: background-color 0.2s ease, transform 0.2s ease; 
+    width: 100%;
+    height: 2.2rem;       /* Taille fixe en rem au lieu de pourcentage */
+    overflow: hidden;     /* Évite les débordements */
+  }
+  
+  .ability-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 2px;
+  }
+  
+  .ability-main {
     display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
+    margin-bottom: 0px;   /* Supprimé la marge */
     width: 100%;
-    height: 100%;
+  }
+  
+  .ability-main i {
+    margin-right: 2px;    /* Encore réduit */
+    font-size: 0.65rem;   /* Encore réduit */
+  }
+  
+  .ability-name {
+    font-weight: bold;
+    font-size: 0.75rem;   /* Ajouté pour réduire la taille du nom */
+  }
+  
+  .ability-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    line-height: 1;       /* Réduit l'espacement vertical */
+  }
+  
+  .ability-damage {
+    font-size: 0.6rem;    /* Encore réduit */
+  }
+  
+  .ability-mana {
+    font-size: 0.55rem;   /* Encore réduit */
+    color: #60efff;
   }
   
   .ability-button:hover {
@@ -121,6 +164,16 @@
   .ability-button:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
+  }
+  
+  /* Vous pouvez également ajouter des styles spécifiques pour les différents états */
+  .ability-button.has-acted {
+    background: linear-gradient(to bottom, #555, #333);
+    opacity: 0.7;
+  }
+  
+  .ability-button.not-enough-mana {
+    background: linear-gradient(to bottom, #700, #400);
   }
 
   /* Styles pour la sélection d'allié avec transition */
@@ -153,6 +206,8 @@
     width: 500px;
     max-width: 90%;
     transform: scale(0.9);
+    position: absolute;
+    bottom: 0;
     opacity: 0;
     animation: modalAppear 0.4s forwards;
     box-shadow: 0 0 30px rgba(0, 157, 255, 0.6);
