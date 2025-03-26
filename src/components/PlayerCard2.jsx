@@ -6,19 +6,19 @@ function PlayerCard({ player }) {
   // On définit les attaques propres à chaque personnage par leur id
   const abilitiesByPlayer = {
     1: [
-      { attackType: "Attaque", damage: 10, manaCost: 0, icon: "fa-fist-raised" },
+      { attackType: "Attaque", damage: 15, manaCost: 0, icon: "fa-fist-raised" },
       { attackType: "Protection Sacrée", damage: 0, manaCost: 15, icon: "fa-shield" },
       { attackType: "Coup Stratégique", damage: 15, manaCost: 10, icon: "fa-chess-knight" },      
       { attackType: "Bouclier Lumineux", damage: 30, manaCost: 30, icon: "fa-sun" },
     ],
     2: [
-      { attackType: "Attaque", damage: 15, manaCost: 0, icon: "fa-fist-raised" },
+      { attackType: "Attaque", damage: 20, manaCost: 0, icon: "fa-fist-raised" },
       { attackType: "Fracas de Titan", damage: 15, manaCost: 7, icon: "fa-hammer" },
       { attackType: "Fureur Sauvage", damage: 25, manaCost: 15, icon: "fa-bolt" },
       { attackType: "Colère Berserk", damage: 40, manaCost: 20, icon: "fa-fire" },
     ],
     3: [
-      { attackType: "Attaque", damage: 7, manaCost: 0, icon: "fa-fist-raised" },
+      { attackType: "Attaque", damage: 10, manaCost: 0, icon: "fa-fist-raised" },
       { 
         attackType: "Soin Miraculeux", 
         damage: -30, 
@@ -38,7 +38,7 @@ function PlayerCard({ player }) {
       },
     ],
     4: [
-      { attackType: "Attaque", damage: 3, manaCost: 0, icon: "fa-fist-raised" },
+      { attackType: "Attaque", damage: 12, manaCost: 0, icon: "fa-fist-raised" },
       { attackType: "Flamme Sombre", damage: 17, manaCost: 9, icon: "fa-fire" },
       { attackType: "Onde de Ténèbres", damage: 23, manaCost: 18, icon: "fa-wave-square" },
       { attackType: "Invocation Maléfique", damage: 35, manaCost: 20, icon: "fa-magic" },

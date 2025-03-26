@@ -27,9 +27,19 @@ export const fightSlice = createSlice({
   initialState,
   reducers: {
     hitMonster: (state, action) => {
-      const { damage, playerId, manaCost } = action.payload;
+      const { damage, playerId, manaCost, healAllies, targetType } = action.payload;
       // Réduire les PV du monstre
       state.monster.pv = Math.max(0, state.monster.pv - damage);
+
+      // Soigner tous les alliés si la capacité le permet
+      if (healAllies && targetType === "enemyAndAllies") {
+        state.players.forEach(player => {
+          // Ne pas soigner le joueur qui lance l'attaque et uniquement les joueurs vivants
+          if (player.id !== playerId && player.pv > 0) {
+            player.pv = Math.min(player.pvMax, player.pv + healAllies);
+          }
+        });
+      }
 
       // Réduire le mana du joueur
       const playerIndex = state.players.findIndex((p) => p.id === playerId);

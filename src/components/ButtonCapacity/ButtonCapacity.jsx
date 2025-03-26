@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
-// Modifier cette ligne pour inclure monsterAttack
-import { hitMonster, hitBack, monsterAttack } from "../../features/fight/fightSlice";
+// Modifier cette ligne pour inclure monsterAttack et healAlly
+import { hitMonster, hitBack, monsterAttack, healAlly } from "../../features/fight/fightSlice";
 
 // Uniquement pour les messages de mort
 const hasShownDeathMessageByPlayer = {};
 
-function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType, needsTargetSelection }) {
+function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType, needsTargetSelection, healAllies }) {
   const dispatch = useDispatch();
   const [message, setMessage] = useState(null);
+  const [showTargetSelection, setShowTargetSelection] = useState(false);
   const gameStatus = useSelector(state => state.fight.gameStatus);
   const playersWhoActed = useSelector(state => state.fight.playersWhoActed);
   const players = useSelector(state => state.fight.players);
@@ -49,14 +50,78 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
     }
   }, [player.pv, player.name, player.id]);
   
+  const handleTargetSelect = (targetPlayer) => {
+    // Vérifier si le joueur cible est vivant
+    if (targetPlayer.pv > 0) {
+      // Envoyer l'action pour soigner l'allié
+      dispatch(healAlly({
+        allyId: targetPlayer.id,
+        healAmount: Math.abs(damage),  // conversion de -30 à 30 pour le soin
+        casterId: player.id,
+        manaCost
+      }));
+      
+      // Message pour l'action de soin
+      if (window.addCombatLogMessage) {
+        window.addCombatLogMessage(
+          `${player.name} utilise ${attackType} et soigne ${targetPlayer.name} de ${Math.abs(damage)} points de vie!`, 
+          "success"
+        );
+      }
+      
+      // Fermer la sélection de cible
+      setShowTargetSelection(false);
+      
+      // Contre-attaque potentielle du monstre
+      const monsterMissesAttack = Math.random() <= 0.3;
+      if (!monsterMissesAttack) {
+        const randomDamage = Math.floor(Math.random() * 6) + 3;
+        dispatch(hitBack({ damage: randomDamage, playerId: player.id }));
+        
+        if (window.addCombatLogMessage) {
+          window.addCombatLogMessage(`Neclord contre-attaque ${player.name} et inflige ${randomDamage} dégâts!`, "danger");
+        }
+      } else {
+        if (window.addCombatLogMessage) {
+          window.addCombatLogMessage("Neclord rate sa contre-attaque!", "success");
+        }
+      }
+      
+      // Vérification pour l'attaque du monstre
+      const alivePlayers = players.filter(p => p.pv > 0);
+      const playersWhoWillHaveActed = [...playersWhoActed, player.id];
+      
+      if (alivePlayers.length > 0 && alivePlayers.every(p => playersWhoWillHaveActed.includes(p.id))) {
+        if (window.addCombatLogMessage) {
+          window.addCombatLogMessage("Tous les héros ont agi, c'est au tour de Neclord!", "warning");
+        }
+        
+        setTimeout(() => {
+          dispatch(monsterAttack());
+        }, 1000);
+      }
+    }
+  };
+  
   const fight = () => {
     if (player.pv > 0 && player.mana >= manaCost && !hasPlayerActed) {
-      // Le joueur attaque le monstre
-      dispatch(hitMonster({ damage, playerId: player.id, manaCost }));
+      // Le joueur attaque le monstre avec les propriétés supplémentaires
+      dispatch(hitMonster({ 
+        damage, 
+        playerId: player.id, 
+        manaCost,
+        healAllies,
+        targetType
+      }));
       
-      // Ajouter un message pour l'attaque du joueur
+      // Message pour l'attaque du joueur
       if (window.addCombatLogMessage) {
-        window.addCombatLogMessage(`${player.name} attaque Neclord et inflige ${damage} dégâts!`, "primary");
+        window.addCombatLogMessage(`${player.name} utilise ${attackType} et inflige ${damage} dégâts à Neclord!`, "primary");
+        
+        // Ajouter un message de soin si c'est une capacité qui soigne les alliés
+        if (healAllies && targetType === "enemyAndAllies") {
+          window.addCombatLogMessage(`${attackType} soigne tous les alliés de ${healAllies} PV!`, "success");
+        }
       }
 
       function getRandomInt(min, max) {
@@ -109,8 +174,10 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
       return;
     }
 
+    // Si c'est une capacité qui nécessite la sélection d'un allié
     if (targetType === "ally" && needsTargetSelection) {
-      // Logique de sélection de cible...
+      // Afficher l'interface de sélection d'allié
+      setShowTargetSelection(true);
     } else {
       fight();
     }
@@ -124,13 +191,43 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
         disabled={(player.pv === 0) || (player.mana < manaCost) || (gameStatus !== "playing") || hasPlayerActed}
       >
         <i className={`fas ${icon} mr-1`}></i>
-        {attackType} ({damage})
+        {attackType} ({Math.abs(damage)})
         {manaCost > 0 && <span className="ml-1">({manaCost} mana)</span>}
       </button>
       
       {message && (
         <div className="message-popup">
           {message}
+        </div>
+      )}
+      
+      {/* Interface de sélection d'allié */}
+      {showTargetSelection && (
+        <div className="ally-selection-overlay">
+          <div className="ally-selection-modal">
+            <h4>Choisir un allié à soigner:</h4>
+            <div className="ally-selection-grid">
+              {players.map((p, index) => (
+                <button
+                  key={p.id}
+                  className={`ally-selection-button ${p.pv === 0 ? 'disabled' : ''}`}
+                  onClick={() => p.pv > 0 && handleTargetSelect(p)}
+                  disabled={p.pv === 0}
+                  style={{ 
+                    opacity: p.pv > 0 ? 1 : 0.5,
+                    '--index': index // Variable pour l'animation séquentielle
+                  }}
+                >
+                  <img src={p.image} alt={p.name} />
+                  <div className="ally-name">{p.name}</div>
+                  <div className="ally-health">{p.pv}/{p.pvMax} PV</div>
+                </button>
+              ))}
+            </div>
+            <button className="cancel-button" onClick={() => setShowTargetSelection(false)}>
+              Annuler
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -8,25 +8,25 @@ function PlayerCard({ player }) {
   // Définition des capacités pour chaque joueur
   const abilitiesByPlayer = {
     1: [
-      { label: "Capacité 1", attackType: "Attaque", damage: 10, manaCost: 0, icon: "fa-fist-raised" },
-      { label: "Capacité 2", attackType: "Protection Sacrée", damage: 0, manaCost: 15, icon: "fa-shield" },
-      { label: "Capacité 3", attackType: "Coup Stratégique", damage: 15, manaCost: 10, icon: "fa-chess-knight" },
-      { label: "Capacité 4", attackType: "Bouclier Lumineux", damage: 30, manaCost: 30, icon: "fa-sun" },
+      { label: "Capacité 1", attackType: "Attaque", damage: 15, manaCost: 0, icon: "fa-fist-raised" },
+      { label: "Capacité 2", attackType: "Danse des Astres", damage: 25, manaCost: 15, icon: "fa-shield-alt" },
+      { label: "Capacité 3", attackType: "Coup Stratégique", damage: 20, manaCost: 5, icon: "fa-chess-knight" },
+      { label: "Capacité 4", attackType: "Bénédiction Céleste", damage: 50, manaCost: 50, icon: "fa-sun", healAllies: 50, targetType: "enemyAndAllies" },
     ],
     2: [
-      { label: "Capacité 1", attackType: "Attaque", damage: 15, manaCost: 0, icon: "fa-fist-raised" },
-      { label: "Capacité 2", attackType: "Fracas de Titan", damage: 15, manaCost: 7, icon: "fa-hammer" },
-      { label: "Capacité 3", attackType: "Fureur Sauvage", damage: 25, manaCost: 15, icon: "fa-bolt" },
+      { label: "Capacité 1", attackType: "Attaque", damage: 20, manaCost: 0, icon: "fa-fist-raised" },
+      { label: "Capacité 2", attackType: "Fracas de Titan", damage: 35, manaCost: 15, icon: "fa-hammer" },
+      { label: "Capacité 3", attackType: "Fureur Sauvage", damage: 25, manaCost: 10, icon: "fa-bolt" },
       { label: "Capacité 4", attackType: "Colère Berserk", damage: 40, manaCost: 20, icon: "fa-fire" },
     ],
     3: [
-      { label: "Capacité 1", attackType: "Attaque", damage: 7, manaCost: 0, icon: "fa-fist-raised" },
+      { label: "Capacité 1", attackType: "Attaque", damage: 10, manaCost: 0, icon: "fa-fist-raised" },
       { label: "Capacité 2", attackType: "Soin Miraculeux", damage: -30, manaCost: 15, icon: "fa-heart", targetType: "ally", needsTargetSelection: true },
-      { label: "Capacité 3", attackType: "Jugement Divin", damage: 20, manaCost: 15, icon: "fa-gavel" },
+      { label: "Capacité 3", attackType: "Jugement Divin", damage: 20, manaCost: 8, icon: "fa-gavel" },
       { label: "Capacité 4", attackType: "Réveil Vital", damage: -15, manaCost: 35, icon: "fa-plus", targetType: "deadAlly", needsTargetSelection: true },
     ],
     4: [
-      { label: "Capacité 1", attackType: "Attaque", damage: 3, manaCost: 0, icon: "fa-fist-raised" },
+      { label: "Capacité 1", attackType: "Attaque", damage: 7, manaCost: 0, icon: "fa-fist-raised" },
       { label: "Capacité 2", attackType: "Flamme Sombre", damage: 17, manaCost: 9, icon: "fa-fire" },
       { label: "Capacité 3", attackType: "Onde de Ténèbres", damage: 23, manaCost: 18, icon: "fa-wave-square" },
       { label: "Capacité 4", attackType: "Invocation Maléfique", damage: 35, manaCost: 20, icon: "fa-magic" },
@@ -77,7 +77,8 @@ function PlayerCard({ player }) {
               icon={ability.icon}
               targetType={ability.targetType}
               needsTargetSelection={ability.needsTargetSelection}
-              className="ability-button" // On passe la classe pour styliser le bouton
+              healAllies={ability.healAllies}
+              className="ability-button"
             />
           ))}
         </div>

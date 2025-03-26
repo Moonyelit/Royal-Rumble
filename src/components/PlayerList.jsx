@@ -1,7 +1,7 @@
 // PlayerList.jsx
 import React from "react";
 import { useSelector } from "react-redux";
-import PlayerCard from "./PlayerCard";
+import PlayerCard from "./PlayerCard2";
 
 function PlayerList() {
   const players = useSelector((state) => state.fight.players);
