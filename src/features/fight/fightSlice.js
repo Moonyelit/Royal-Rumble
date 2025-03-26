@@ -7,10 +7,10 @@ import SierraImg from "../../../public/Sierra/SierraImg.png";
 
 const initialState = {
   players: [
-    { name: "Riou", pv: 200, pvMax: 200, mana: 150, manaMax: 150, id: 1, image: RiouImg },
-    { name: "ViKtor", pv: 220, pvMax: 220, mana: 85, manaMax: 85, id: 2, image: ViktorImg },
-    { name: "Nanami", pv: 150, pvMax: 150, mana: 150, manaMax: 150, id: 3, image: NanamiImg },
-    { name: "Sierra", pv: 130, pvMax: 130, mana: 200, manaMax: 200, id: 4, image: SierraImg },
+    { name: "Riou", pv: 230, pvMax: 230, mana: 170, manaMax: 170, id: 1, image: RiouImg },
+    { name: "ViKtor", pv: 250, pvMax: 250, mana: 100, manaMax: 100, id: 2, image: ViktorImg },
+    { name: "Nanami", pv: 180, pvMax: 180, mana: 170, manaMax: 170, id: 3, image: NanamiImg },
+    { name: "Sierra", pv: 150, pvMax: 150, mana: 230, manaMax: 230, id: 4, image: SierraImg },
   ],
   monster: {
     name: "Neclord",

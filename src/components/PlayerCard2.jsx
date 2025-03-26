@@ -6,31 +6,31 @@ function PlayerCard({ player }) {
   // On définit les attaques propres à chaque personnage par leur id
   const abilitiesByPlayer = {
     1: [
-      { attackType: "Attaque", damage: 15, manaCost: 0, icon: "fa-fist-raised" },
+      { attackType: "Attaque", damage: 18, manaCost: 0, icon: "fa-fist-raised" },
       { attackType: "Protection Sacrée", damage: 0, manaCost: 15, icon: "fa-shield" },
-      { attackType: "Coup Stratégique", damage: 15, manaCost: 10, icon: "fa-chess-knight" },      
-      { attackType: "Bouclier Lumineux", damage: 30, manaCost: 30, icon: "fa-sun" },
+      { attackType: "Coup Stratégique", damage: 20, manaCost: 10, icon: "fa-chess-knight" },      
+      { attackType: "Bouclier Lumineux", damage: 35, manaCost: 30, icon: "fa-sun" },
     ],
     2: [
-      { attackType: "Attaque", damage: 20, manaCost: 0, icon: "fa-fist-raised" },
-      { attackType: "Fracas de Titan", damage: 15, manaCost: 7, icon: "fa-hammer" },
-      { attackType: "Fureur Sauvage", damage: 25, manaCost: 15, icon: "fa-bolt" },
-      { attackType: "Colère Berserk", damage: 40, manaCost: 20, icon: "fa-fire" },
+      { attackType: "Attaque", damage: 24, manaCost: 0, icon: "fa-fist-raised" },
+      { attackType: "Fracas de Titan", damage: 20, manaCost: 7, icon: "fa-hammer" },
+      { attackType: "Fureur Sauvage", damage: 30, manaCost: 15, icon: "fa-bolt" },
+      { attackType: "Colère Berserk", damage: 48, manaCost: 20, icon: "fa-fire" },
     ],
     3: [
-      { attackType: "Attaque", damage: 10, manaCost: 0, icon: "fa-fist-raised" },
+      { attackType: "Attaque", damage: 12, manaCost: 0, icon: "fa-fist-raised" },
       { 
         attackType: "Soin Miraculeux", 
-        damage: -30, 
+        damage: -35, 
         manaCost: 15, 
         icon: "fa-heart",
         targetType: "ally", 
         needsTargetSelection: true 
       },
-      { attackType: "Jugement Divin", damage: 20, manaCost: 15, icon: "fa-gavel" },
+      { attackType: "Jugement Divin", damage: 25, manaCost: 15, icon: "fa-gavel" },
       { 
         attackType: "Réveil Vital", 
-        damage: -15, // Cette valeur sera ignorée, on utilisera plutôt 50% des PV max
+        damage: -20, // Cette valeur sera ignorée, on utilisera plutôt 50% des PV max
         manaCost: 35, 
         icon: "fa-plus",
         targetType: "deadAlly", // Nouveau type de cible spécifique aux alliés morts
@@ -38,10 +38,10 @@ function PlayerCard({ player }) {
       },
     ],
     4: [
-      { attackType: "Attaque", damage: 12, manaCost: 0, icon: "fa-fist-raised" },
-      { attackType: "Flamme Sombre", damage: 17, manaCost: 9, icon: "fa-fire" },
-      { attackType: "Onde de Ténèbres", damage: 23, manaCost: 18, icon: "fa-wave-square" },
-      { attackType: "Invocation Maléfique", damage: 35, manaCost: 20, icon: "fa-magic" },
+      { attackType: "Attaque", damage: 15, manaCost: 0, icon: "fa-fist-raised" },
+      { attackType: "Flamme Sombre", damage: 22, manaCost: 9, icon: "fa-fire" },
+      { attackType: "Onde de Ténèbres", damage: 28, manaCost: 18, icon: "fa-wave-square" },
+      { attackType: "Invocation Maléfique", damage: 42, manaCost: 20, icon: "fa-magic" },
     ],
   };
 
