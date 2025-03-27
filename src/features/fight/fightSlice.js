@@ -14,8 +14,8 @@ const initialState = {
   ],
   monster: {
     name: "Neclord",
-    pv: 1500,
-    pvMax: 1500,
+    pv: 1000,
+    pvMax: 1000,
   },
   gameStatus: "playing",
   playersWhoActed: [],

@@ -67,6 +67,20 @@
    z-index: 0;
  }
  
+ /* Animation de mort pour Neclord */
+ @keyframes shake {
+   0% { transform: translate(-50%, -50%) translateX(-5px); }
+   25% { transform: translate(-50%, -50%) translateX(5px); }
+   50% { transform: translate(-50%, -50%) translateX(-3px); }
+   75% { transform: translate(-50%, -50%) translateX(3px); }
+   100% { transform: translate(-50%, -50%) translateX(0); }
+ }
+ 
+ .monster-death-animation {
+   animation: shake 2s ease-in-out forwards;
+   filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.8)) brightness(1.3) saturate(1.5);
+ }
+
  .combat-log-container {
    position: absolute;
    top: 2%;
@@ -158,22 +172,118 @@
    padding: 10px;
  }
 
+/* Position du conteneur des héros */
 .Heros-sections {
   position: absolute;
   bottom: 14%;
-  left: 38%;
+  left: 44%;
   display: flex;
-  z-index: 0;
+  gap: 10px; 
+}
+
+/* Styles de base pour toutes les images de personnages */
+.Riou-image, .Viktor-image, .Nanami-image, .Sierra-image {
+  display: block;
+  margin: 0 5px;
+  min-height: 1rem;
+}
+
+
+/* Styles spécifiques pour chaque personnage en état de danger */
+.Riou-image.hero-image-danger {
+  margin-top: 6rem;
+  height: 9rem;
+  object-fit: contain;
+}
+
+.Viktor-image.hero-image-danger {
+  margin-top: 3rem;
+  height:13rem;
+  object-fit: contain;
+}
+
+.Nanami-image.hero-image-danger {
+  margin-top: 5.5rem;
+  height: 10rem;
+  object-fit: contain;
+}
+
+.Sierra-image.hero-image-danger {
+  margin-top: 6rem;
+  height: 9rem;
+  object-fit: contain;
+}
+
+/* Styles spécifiques pour chaque personnage en état de mort */
+.Riou-image.hero-image-death {
+  margin-top: 7rem;
+  height: 9rem;
+  object-fit: contain;
+}
+
+.Viktor-image.hero-image-death {
+  margin-top: 6.5rem;
+  height:8.5rem;
+  object-fit: contain;
+}
+
+.Nanami-image.hero-image-death {
+  margin-top: 6rem;
+  height: 10rem;
+  object-fit: contain;
+}
+
+.Sierra-image.hero-image-death {
+  margin-top: 6rem;
+  height: 9rem;
+  object-fit: contain;
 }
 
 
 
+/* Style pour la fenêtre de victoire */
+.victory-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #000046 0%, #1CB5E0 100%);
+  border: 3px solid rgb(255, 255, 255);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+  z-index: 1000;
+  width: 400px;
+  animation: appear 0.5s ease-out;
+}
 
+@keyframes appear {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
 
-/* position: absolute;
-top: 40%;
-left: 40%;
-transform: translate(-50%, -50%);
-width: 11rem; 
-height: auto;
-z-index: 1; */
+.victory-modal h2 {
+  color: rgb(255, 255, 255);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+  margin-bottom: 20px;
+}
+
+.retry-button {
+  background: linear-gradient(135deg, #000046 0%, #00f 100%);
+  border: 2px solid white;
+  color: white;
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin-top: 20px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
