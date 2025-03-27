@@ -1,5 +1,5 @@
 // BattleScene.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import PlayerList from "../PlayerList/PlayerList";
 import ProgressBar from "../ProgressBar/ProgressBar";
@@ -35,16 +35,32 @@ function BattleScene() {
   // État pour contrôler l'affichage de la fenêtre de victoire
   const [showVictoryModal, setShowVictoryModal] = useState(false);
   
+  // Références pour les éléments audio
+  const victoryAudioRef = useRef(null);
+  const deathAudioRef = useRef(null);
+  
   // Récupération du monstre et des joueurs
   const monster = useSelector((state) => state.fight.monster);
   const players = useSelector((state) => state.fight.players);
 
-  // Afficher la fenêtre de victoire après un court délai quand le monstre est vaincu
+  // Gérer l'animation de mort et les sons
   useEffect(() => {
     if (monster.pv === 0) {
+      // Jouer immédiatement le son de mort
+      if (deathAudioRef.current) {
+        deathAudioRef.current.volume = 0.5;
+        deathAudioRef.current.play().catch(e => console.log("Erreur audio mort:", e));
+      }
+      
+      // Afficher la fenêtre de victoire après la fin de l'animation (4s)
       const timer = setTimeout(() => {
         setShowVictoryModal(true);
-      }, 2500); // Attendre 2.5 secondes pour que l'animation se termine
+        // Jouer la musique de victoire
+        if (victoryAudioRef.current) {
+          victoryAudioRef.current.volume = 0.5;
+          victoryAudioRef.current.play().catch(e => console.log("Erreur audio victoire:", e));
+        }
+      }, 4000); // Attendre 4 secondes pour correspondre à la durée de l'animation
       
       return () => clearTimeout(timer);
     }
@@ -129,6 +145,10 @@ function BattleScene() {
 
   return (
     <div className="battle-scene">
+      {/* Éléments audio */}
+      <audio ref={victoryAudioRef} src="/music/Victory.mp3" preload="auto" />
+      <audio ref={deathAudioRef} src="/music/Death.mp3" preload="auto" />
+      
       {/* Contrôle de la musique */}
       <MusicControl />
 

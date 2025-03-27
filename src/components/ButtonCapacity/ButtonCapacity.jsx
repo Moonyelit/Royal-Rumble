@@ -15,6 +15,9 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
   const playersWhoActed = useSelector(state => state.fight.playersWhoActed);
   const players = useSelector(state => state.fight.players);
   
+  // Référence audio pour le son de clic
+  const clickSoundRef = useRef(null);
+  
   // Vérifier si ce joueur a déjà agi
   const hasPlayerActed = playersWhoActed.includes(player.id);
   
@@ -51,6 +54,12 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
   }, [player.pv, player.name, player.id]);
   
   const handleTargetSelect = (targetPlayer) => {
+    // Jouer le son de clic
+    if (clickSoundRef.current) {
+      clickSoundRef.current.currentTime = 0;
+      clickSoundRef.current.play().catch(e => console.log("Erreur audio:", e));
+    }
+    
     // Code existant pour soigner un allié...
     if (targetType === "ally" && targetPlayer.pv > 0) {
       // Envoyer l'action pour soigner l'allié
@@ -227,6 +236,12 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
   };
 
   const handleClick = () => {
+    // Jouer le son de clic
+    if (clickSoundRef.current) {
+      clickSoundRef.current.currentTime = 0; // Remettre le son au début
+      clickSoundRef.current.play().catch(e => console.log("Erreur audio:", e));
+    }
+
     // Vérifier si le joueur a assez de mana
     if (player.mana < manaCost) {
       setMessage(`Pas assez de mana! (${player.mana}/${manaCost})`);
@@ -244,6 +259,9 @@ function ButtonCapacity({ player, attackType, damage, manaCost, icon, targetType
 
   return (
     <div>
+      {/* Élément audio pour le son de clic */}
+      <audio ref={clickSoundRef} src="/music/Menu-cursor.mp3" preload="auto" />
+      
       <button 
         className={`ability-button ${hasPlayerActed ? 'has-acted' : (!hasEnoughMana ? 'not-enough-mana' : 'default')}`} 
         onClick={handleClick}
