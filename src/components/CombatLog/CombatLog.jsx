@@ -3,18 +3,19 @@ import { useSelector } from 'react-redux';
 
 function CombatLog() {
   const [messages, setMessages] = useState([]);
-  const messagesRef = useRef(messages); // Référence stable pour éviter les dépendances cycliques
+  const messagesRef = useRef(messages);
   const lastAttack = useSelector(state => state.fight.lastAttack);
   const gameStatus = useSelector(state => state.fight.gameStatus);
+  const logContainerRef = useRef(null);
   
   // Mettre à jour la référence quand messages change
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
   
-  // Utiliser useCallback sans dépendre de messages directement
+  // Fonction pour ajouter un message
   const addMessage = useCallback((text, type = "info") => {
-    if (!text) return; // Ne pas ajouter de message vide
+    if (!text) return;
     
     // Vérifier si un message identique existe déjà dans les 2 dernières secondes
     const now = Date.now();
@@ -35,15 +36,15 @@ function CombatLog() {
       timestamp: new Date().toLocaleTimeString()
     };
     
+    // Ajouter explicitement le nouveau message au début du tableau
     setMessages(prev => {
-      // Garder un maximum de 10 messages
       const updated = [newMessage, ...prev];
-      if (updated.length > 10) return updated.slice(0, 10);
-      return updated;
+      // Limiter à 10 messages maximum
+      return updated.slice(0, 10);
     });
-  }, []); // Dépendance vide pour éviter les re-créations inutiles
-  
-  // Effet pour ajouter un message d'attaque
+  }, []);
+
+  // Gestion des messages d'attaque - code inchangé
   useEffect(() => {
     if (lastAttack && typeof lastAttack === 'object') {
       let newMessage = "";
@@ -73,6 +74,21 @@ function CombatLog() {
           case "miss":
             newMessage = `Neclord tente une attaque mais la rate complètement!`;
             break;
+          case "playerAttack":
+            if (lastAttack.name && lastAttack.attackerName && lastAttack.damage !== undefined) {
+              newMessage = `${lastAttack.attackerName} attaque Neclord avec ${lastAttack.name} et inflige ${lastAttack.damage} dégâts!`;
+            }
+            break;
+          case "heal":
+            if (lastAttack.name && lastAttack.healerName && lastAttack.targetName && lastAttack.healAmount !== undefined) {
+              newMessage = `${lastAttack.healerName} utilise ${lastAttack.name} sur ${lastAttack.targetName} et restaure ${lastAttack.healAmount} points de vie!`;
+            }
+            break;
+          case "resurrect":
+            if (lastAttack.name && lastAttack.healerName && lastAttack.targetName && lastAttack.healAmount !== undefined) {
+              newMessage = `${lastAttack.healerName} utilise ${lastAttack.name} sur ${lastAttack.targetName} et le ressuscite avec ${lastAttack.healAmount} points de vie!`;
+            }
+            break;
           default:
             newMessage = "";
         }
@@ -86,7 +102,7 @@ function CombatLog() {
     }
   }, [lastAttack, addMessage]);
   
-  // Effet pour les messages de statut de jeu
+  // Messages de statut du jeu - code inchangé
   useEffect(() => {
     if (gameStatus === "defeat") {
       addMessage("DÉFAITE ! Tous les joueurs sont morts.", "danger");
@@ -95,23 +111,21 @@ function CombatLog() {
     }
   }, [gameStatus, addMessage]);
   
-  // Exposer la fonction addMessage globalement pour qu'elle soit accessible
-  // depuis d'autres composants
+  // Exposer la fonction addMessage globalement - code inchangé
   useEffect(() => {
-    // Assigner la fonction à window
     window.addCombatLogMessage = (text, type) => {
       if (text) addMessage(text, type);
     };
     
-    // Nettoyer lors du démontage du composant
     return () => {
       delete window.addCombatLogMessage;
     };
   }, [addMessage]);
   
-  // Rendu du composant
+  // Rendu du composant avec ordre des messages garanti
   return (
-    <div className="combat-log">
+    <div className="combat-log" ref={logContainerRef}>
+      {/* Afficher les messages dans l'ordre où ils sont dans le state (les plus récents d'abord) */}
       {Array.isArray(messages) && messages.map(msg => (
         <div key={msg.id} className={`alert alert-${msg.type} mb-2`} style={{fontSize: '0.9rem'}}>
           <small>{msg.timestamp}</small>: {msg.text}

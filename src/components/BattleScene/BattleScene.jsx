@@ -39,6 +39,7 @@ function BattleScene() {
   // Références pour les éléments audio
   const victoryAudioRef = useRef(null);
   const deathAudioRef = useRef(null);
+  const gameOverAudioRef = useRef(null); // Nouvelle référence pour l'audio de Game Over
   
   // Récupération du monstre, des joueurs et du statut du jeu
   const monster = useSelector((state) => state.fight.monster);
@@ -71,10 +72,10 @@ function BattleScene() {
   // Surveiller le statut du jeu pour détecter la défaite
   useEffect(() => {
     if (gameStatus === "defeat") {
-      // Jouer le son de défaite
-      if (deathAudioRef.current) {
-        deathAudioRef.current.volume = 0.5;
-        deathAudioRef.current.play().catch(e => console.log("Erreur audio défaite:", e));
+      // Jouer le son de Game Over au lieu du son de mort
+      if (gameOverAudioRef.current) {
+        gameOverAudioRef.current.volume = 0.5;
+        gameOverAudioRef.current.play().catch(e => console.log("Erreur audio game over:", e));
       }
       
       // Afficher la fenêtre de défaite après un court délai
@@ -171,6 +172,7 @@ function BattleScene() {
       {/* Éléments audio */}
       <audio ref={victoryAudioRef} src="/music/Victory.mp3" preload="auto" />
       <audio ref={deathAudioRef} src="/music/Death.mp3" preload="auto" />
+      <audio ref={gameOverAudioRef} src="/music/GameOver.mp3" preload="auto" />
       
       {/* Contrôle de la musique */}
       <MusicControl />
@@ -249,10 +251,10 @@ function BattleScene() {
       {/* Fenêtre de défaite conditionnellement rendue */}
       {showDefeatModal && (
         <div className="defeat-modal">
-          <h2>Défaite</h2>
-          <p>Vous avez été vaincu par le boss.</p>
+          <h2>Dommage !</h2>
+          <p>Vous y étiez presque ! Encore un effort ! </p>
           <button className="retry-button" onClick={handleRetry}>
-            Réessayer ?
+            Recommencer ?
           </button>
         </div>
       )}

@@ -34,9 +34,12 @@ function PlayerCard({ player }) {
   };
 
   const abilities = abilitiesByPlayer[player.id] || [];
+  
+  // Ajouter une classe pour indiquer si le joueur est mort
+  const playerIsDead = player.pv === 0;
 
   return (
-    <div className="player-card">
+    <div className={`player-card ${playerIsDead ? 'player-dead' : ''}`}>
       <div className="player-card-body">
         <div className="top-row">
           <div className="image-container">
@@ -84,6 +87,13 @@ function PlayerCard({ player }) {
           ))}
         </div>
       </div>
+      
+      {/* Ajout d'un élément visuel pour indiquer la mort */}
+      {playerIsDead && (
+        <div className="death-overlay">
+          <i className="fas fa-skull"></i>
+        </div>
+      )}
     </div>
   );
 }
