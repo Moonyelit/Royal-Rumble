@@ -89,6 +89,11 @@ export const fightSlice = createSlice({
     },
 
     monsterAttack: (state) => {
+      // NOUVELLE VÉRIFICATION: Ne pas continuer si le monstre est mort
+      if (state.monster.pv <= 0 || state.gameStatus === "victory") {
+        return;
+      }
+
       // Réinitialiser les actions des joueurs pour le tour suivant
       state.playersWhoActed = [];
       

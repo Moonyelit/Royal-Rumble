@@ -39,16 +39,32 @@ function BattleScene() {
   // Références pour les éléments audio
   const victoryAudioRef = useRef(null);
   const deathAudioRef = useRef(null);
-  const gameOverAudioRef = useRef(null); // Nouvelle référence pour l'audio de Game Over
+  const gameOverAudioRef = useRef(null);
+  const battleMusicRef = useRef(null); // Nouvelle référence pour la musique de combat
   
   // Récupération du monstre, des joueurs et du statut du jeu
   const monster = useSelector((state) => state.fight.monster);
   const players = useSelector((state) => state.fight.players);
   const gameStatus = useSelector((state) => state.fight.gameStatus);
 
+  // Effet pour initialiser la référence à la musique de combat
+  useEffect(() => {
+    // Trouver l'élément audio de la musique de bataille par son ID ou autre attribut
+    const battleMusic = document.querySelector('audio[src*="neclord-battle.mp3"]');
+    if (battleMusic) {
+      battleMusicRef.current = battleMusic;
+    }
+  }, []);
+  
   // Gérer l'animation de mort et les sons
   useEffect(() => {
     if (monster.pv === 0) {
+      // Arrêter la musique de bataille
+      if (battleMusicRef.current) {
+        battleMusicRef.current.pause();
+        battleMusicRef.current.currentTime = 0;
+      }
+      
       // Jouer immédiatement le son de mort
       if (deathAudioRef.current) {
         deathAudioRef.current.volume = 0.5;

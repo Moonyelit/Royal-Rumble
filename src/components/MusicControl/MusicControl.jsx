@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useSelector } from 'react-redux';
 import "./MusicControl.css";
 
 function MusicControl() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioLoaded, setAudioLoaded] = useState(false);
   const audioRef = useRef(null);
-  
+  const gameStatus = useSelector((state) => state.fight.gameStatus);
+  const monsterPV = useSelector((state) => state.fight.monster.pv);
+
   // Initialisation de l'audio
   useEffect(() => {
     const audio = new Audio("/music/neclord-battle.mp3");
@@ -46,6 +49,16 @@ function MusicControl() {
     // Activer la lecture en boucle
     audioRef.current.loop = true;
   }, [isPlaying]);
+
+  // Arrêter la musique quand le jeu est terminé (victoire ou défaite)
+  useEffect(() => {
+    if (gameStatus === 'victory' || gameStatus === 'defeat' || monsterPV === 0) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    }
+  }, [gameStatus, monsterPV]);
 
   const togglePlay = () => {
     if (audioLoaded) {
