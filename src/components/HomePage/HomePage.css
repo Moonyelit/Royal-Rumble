@@ -6,7 +6,7 @@
     align-items: center;
     background-color: #232323;
     /* Ajout du background GIF */
-    background-image: url('/BackgroundGif.gif');
+    /* background-image: url('/BackgroundGif.gif'); */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
