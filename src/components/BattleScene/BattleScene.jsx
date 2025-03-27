@@ -32,16 +32,18 @@ import SierraDeath from "../../../public/Sierra/SierraDeath.gif";
 import "./BattleScene.css";
 
 function BattleScene() {
-  // État pour contrôler l'affichage de la fenêtre de victoire
+  // État pour contrôler l'affichage des fenêtres modales
   const [showVictoryModal, setShowVictoryModal] = useState(false);
+  const [showDefeatModal, setShowDefeatModal] = useState(false);
   
   // Références pour les éléments audio
   const victoryAudioRef = useRef(null);
   const deathAudioRef = useRef(null);
   
-  // Récupération du monstre et des joueurs
+  // Récupération du monstre, des joueurs et du statut du jeu
   const monster = useSelector((state) => state.fight.monster);
   const players = useSelector((state) => state.fight.players);
+  const gameStatus = useSelector((state) => state.fight.gameStatus);
 
   // Gérer l'animation de mort et les sons
   useEffect(() => {
@@ -65,6 +67,22 @@ function BattleScene() {
       return () => clearTimeout(timer);
     }
   }, [monster.pv]);
+
+  // Surveiller le statut du jeu pour détecter la défaite
+  useEffect(() => {
+    if (gameStatus === "defeat") {
+      // Jouer le son de défaite
+      if (deathAudioRef.current) {
+        deathAudioRef.current.volume = 0.5;
+        deathAudioRef.current.play().catch(e => console.log("Erreur audio défaite:", e));
+      }
+      
+      // Afficher la fenêtre de défaite après un court délai
+      setTimeout(() => {
+        setShowDefeatModal(true);
+      }, 1000);
+    }
+  }, [gameStatus]);
 
   // Fonction pour redémarrer le jeu
   const handleRetry = () => {
@@ -145,6 +163,11 @@ function BattleScene() {
 
   return (
     <div className="battle-scene">
+      {/* Overlay sombre pour les modales */}
+      {(showVictoryModal || showDefeatModal) && (
+        <div className="modal-overlay"></div>
+      )}
+      
       {/* Éléments audio */}
       <audio ref={victoryAudioRef} src="/music/Victory.mp3" preload="auto" />
       <audio ref={deathAudioRef} src="/music/Death.mp3" preload="auto" />
@@ -217,6 +240,17 @@ function BattleScene() {
         <div className="victory-modal">
           <h2>Félicitations !</h2>
           <p>Vous avez vaincu le boss !</p>
+          <button className="retry-button" onClick={handleRetry}>
+            Réessayer ?
+          </button>
+        </div>
+      )}
+
+      {/* Fenêtre de défaite conditionnellement rendue */}
+      {showDefeatModal && (
+        <div className="defeat-modal">
+          <h2>Défaite</h2>
+          <p>Vous avez été vaincu par le boss.</p>
           <button className="retry-button" onClick={handleRetry}>
             Réessayer ?
           </button>
