@@ -99,7 +99,7 @@
   /* Nouveaux styles pour les boutons de capacité - version plus petite */
   .ability-button {
     margin-top: 0.1rem;  /* Encore réduit */
-    background: linear-gradient(to bottom, #00f, #007);
+    background: linear-gradient(to bottom, #2f3386, #1f1041);
     color: white;
     border: none;
     border-radius: 4px;   /* Encore réduit */

@@ -86,7 +86,7 @@
    right: 20px;
    width: 300px;
    height: 50%;
-   background: linear-gradient(to bottom, #00f, #007);
+   background: linear-gradient(to bottom, #2f3386, #1f1041);
    color: #fff;
    border: 2px solid #fff;
    overflow-y: auto;
@@ -270,7 +270,7 @@
 }
 
 .retry-button {
-  background: linear-gradient(135deg, #000046 0%, #00f 100%);
+  background: linear-gradient(135deg, #000046 0%, #2f3386 100%);
   border: 2px solid white;
   color: white;
   border-radius: 5px;

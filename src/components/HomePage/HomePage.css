@@ -1,0 +1,63 @@
+.home-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #232323;
+    /* Ajout du background GIF */
+    background-image: url('/BackgroundGif.gif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+/* Ajouter une superposition semi-transparente pour améliorer la lisibilité du contenu */
+.home-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(35, 35, 35, 0.5); /* Noir semi-transparent */
+    z-index: 1;
+}
+
+.home-content {
+    text-align: center;
+    max-width: 600px;
+    padding: 2rem;
+    position: relative;
+    z-index: 2; /* S'assurer que le contenu est au-dessus de la superposition */
+}
+
+.home-logo {
+    width: 400px;
+    height: auto;
+    margin: 0 auto 2rem;
+}
+
+.home-description {
+    color: #b8b8b8;
+    font-size: 1.2rem;
+    margin-bottom: 2.5rem;
+}
+
+.combat-button {
+    background: linear-gradient(to bottom, #2f3386, #1f1041);
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.combat-button:hover {
+    background-color: #cc0000;
+    transform: scale(1.05);
+}
